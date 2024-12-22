@@ -1,7 +1,8 @@
-import 'package:app_ban_ga_admin/view/login_view.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:app_ban_ga_admin/view/admin/view_admin/main_nav_admin.dart';
+import 'package:app_ban_ga_admin/view/login_view.dart';
 
 import 'firebase_options.dart';
 
@@ -26,7 +27,8 @@ class MyApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
         useMaterial3: true,
       ),
-      home: const LoginView(),
+      // home: const LoginView(),
+      home: MainNavAdmin(),
     );
   }
 }

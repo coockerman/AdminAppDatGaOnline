@@ -4,9 +4,9 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:hungry_hub_web/view/admin/view_admin/main_nav_admin.dart';
-import 'package:hungry_hub_web/view/shop/view_shop/main_nav_shop.dart';
 import '../../view/login_view.dart';
+import '../view/admin/view_admin/main_nav_admin.dart';
+import '../view/shop/view_shop/main_nav_shop.dart';
 
 class FirAuth {
   final FirebaseAuth _firebaseAuth = FirebaseAuth.instance;

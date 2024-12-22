@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:app_ban_ga_admin/view_model/login_view_model.dart';
-import 'package:app_ban_ga_admin/widgets/common/image_extention.dart';
+import 'package:hungry_hub_web/view_model/login_view_model.dart';
+import 'package:hungry_hub_web/widgets/common/image_extention.dart';
 
 class LoginView extends StatefulWidget {
   const LoginView({super.key});

@@ -55,7 +55,27 @@ class _MyWidgetState extends State<MainNavShop> with SingleTickerProviderStateMi
           child: ListView(
             padding: EdgeInsets.zero,
             children: [
-
+              SizedBox(
+                height: 190,
+                child: DrawerHeader(
+                  decoration:
+                  BoxDecoration(color: Colors.grey.withOpacity(0.03)),
+                  child: Column(
+                    children: [
+                      const SizedBox(
+                        height: 20,
+                      ),
+                      Image.asset(
+                        ImageAsset.loadLogoApp,
+                        height: 120,
+                      ),
+                      const SizedBox(
+                        height: 16,
+                      ),
+                    ],
+                  ),
+                ),
+              ),
               IconTextRow(
                   title: 'Oder',
                   onTap: () {

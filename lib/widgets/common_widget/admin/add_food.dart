@@ -2,49 +2,32 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:hungry_hub_web/widgets/common_widget/button/bassic_button.dart';
 
-class AddFood extends StatefulWidget {
-  @override
-  _AddFoodState createState() => _AddFoodState();
-}
-
-class _AddFoodState extends State<AddFood> {
+class AddFood extends StatelessWidget {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
   // Controllers for input fields
   final TextEditingController nameController = TextEditingController();
   final TextEditingController priceController = TextEditingController();
-  final TextEditingController categoryController = TextEditingController();
   final TextEditingController descriptionController = TextEditingController();
   final TextEditingController imageUrlController = TextEditingController();
   final TextEditingController imageUrlFacebookController = TextEditingController();
   final TextEditingController showController = TextEditingController();
   final TextEditingController idController = TextEditingController();
 
-  String imageUrlPreview = '';
+  // Selected category
+  String selectedCategory = 'Combo 1 Người';
 
-  @override
-  void initState() {
-    super.initState();
-    imageUrlFacebookController.addListener(() {
-      setState(() {
-        imageUrlPreview = imageUrlFacebookController.text;
-      });
-    });
-  }
+  // List of categories
+  final List<String> categories = [
+    'Combo 1 Người',
+    'Combo Nhóm',
+    'Gà Rán - Gà Quay',
+    'Burger - Cơm - Mì Ý',
+    'Thức ăn nhẹ',
+    'Thức uống & tráng miệng',
+  ];
 
-  @override
-  void dispose() {
-    nameController.dispose();
-    priceController.dispose();
-    categoryController.dispose();
-    descriptionController.dispose();
-    imageUrlController.dispose();
-    imageUrlFacebookController.dispose();
-    showController.dispose();
-    idController.dispose();
-    super.dispose();
-  }
-
+  // Function to add product to Firestore
   Future<void> addProduct(Map<String, dynamic> productData, String id) async {
     try {
       await _firestore.collection('products').doc(id).set(productData);
@@ -54,18 +37,15 @@ class _AddFoodState extends State<AddFood> {
     }
   }
 
+  // Function to reset input fields
   void resetFields() {
     nameController.clear();
     priceController.clear();
-    categoryController.clear();
     descriptionController.clear();
     imageUrlController.clear();
     imageUrlFacebookController.clear();
     showController.clear();
     idController.clear();
-    setState(() {
-      imageUrlPreview = '';
-    });
   }
 
   @override
@@ -92,9 +72,36 @@ class _AddFoodState extends State<AddFood> {
                     ),
                     const SizedBox(height: 10),
 
+                    // Input Fields
                     buildTextField(controller: nameController, label: 'Name'),
                     buildTextField(controller: priceController, label: 'Price', inputType: TextInputType.number),
-                    buildTextField(controller: categoryController, label: 'Category'),
+
+                    // Dropdown for category
+                    Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 8.0),
+                      child: DropdownButtonFormField<String>(
+                        value: selectedCategory,
+                        items: categories.map((category) {
+                          return DropdownMenuItem(
+                            value: category,
+                            child: Text(category),
+                          );
+                        }).toList(),
+                        onChanged: (value) {
+                          if (value != null) {
+                            selectedCategory = value;
+                          }
+                        },
+                        decoration: InputDecoration(
+                          labelText: 'Category',
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                        ),
+                      ),
+                    ),
+
                     buildTextField(controller: descriptionController, label: 'Description'),
                     buildTextField(controller: imageUrlController, label: 'Image URL'),
                     buildTextField(controller: imageUrlFacebookController, label: 'Image URL Facebook'),
@@ -103,6 +110,7 @@ class _AddFoodState extends State<AddFood> {
 
                     const SizedBox(height: 20),
 
+                    // Save Button
                     Center(
                       child: Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 16.0),
@@ -111,11 +119,12 @@ class _AddFoodState extends State<AddFood> {
                             final productData = {
                               'Name': nameController.text,
                               'Price': int.tryParse(priceController.text) ?? 0,
-                              'Category': categoryController.text,
+                              'Category': selectedCategory,
                               'Description': descriptionController.text,
                               'ImageUrl': imageUrlController.text,
                               'ImageUrlFacebook': imageUrlFacebookController.text,
                               'Show': int.tryParse(showController.text) ?? 0,
+                              'id': idController.text,
                             };
                             final id = idController.text;
                             addProduct(productData, id);
@@ -137,32 +146,36 @@ class _AddFoodState extends State<AddFood> {
                 ),
               ),
             ),
-            const SizedBox(width: 16),
+            const SizedBox(width: 20),
             Expanded(
               flex: 1,
               child: Column(
+                crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
                   const Text(
-                    'Image Preview',
+                    'Preview',
                     style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                   ),
                   const SizedBox(height: 10),
                   Container(
-                    width: 250,
-                    height: 250,
+                    width: 400,
+                    height: 300,
                     decoration: BoxDecoration(
                       border: Border.all(color: Colors.grey),
                       borderRadius: BorderRadius.circular(8),
                     ),
-                    child: imageUrlPreview.isNotEmpty
-                        ? Image.network(
-                      imageUrlPreview,
-                      fit: BoxFit.cover,
-                      errorBuilder: (context, error, stackTrace) {
-                        return const Center(child: Text('Invalid URL'));
+                    child: ValueListenableBuilder(
+                      valueListenable: imageUrlFacebookController,
+                      builder: (context, value, child) {
+                        return imageUrlFacebookController.text.isEmpty
+                            ? const Center(child: Text('No Image'))
+                            : Image.network(
+                          imageUrlFacebookController.text,
+                          fit: BoxFit.cover,
+                          errorBuilder: (context, error, stackTrace) => const Center(child: Icon(Icons.broken_image)),
+                        );
                       },
-                    )
-                        : const Center(child: Text('No Image')),
+                    ),
                   ),
                 ],
               ),
@@ -173,6 +186,7 @@ class _AddFoodState extends State<AddFood> {
     );
   }
 
+  // Helper method to build text fields
   Widget buildTextField({
     required TextEditingController controller,
     required String label,

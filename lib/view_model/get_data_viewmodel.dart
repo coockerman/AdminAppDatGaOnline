@@ -11,6 +11,8 @@ class GetDataViewModel extends GetxController {
   final RxList<Map<String, dynamic>> stores = <Map<String, dynamic>>[].obs;
   final RxList<Map<String, dynamic>> products = <Map<String, dynamic>>[].obs;
   final RxList<Map<String, dynamic>> orders = <Map<String, dynamic>>[].obs;
+  final RxList<Map<String, dynamic>> orderTracking = <Map<String, dynamic>>[].obs;
+  final RxList<Map<String, dynamic>> getRevenue = <Map<String, dynamic>>[].obs;
 
   @override
   void onInit() {
@@ -168,6 +170,120 @@ class GetDataViewModel extends GetxController {
       print('Lỗi khi cập nhật sản phẩm: $e');
     }
   }
+  // fetchRevenue
+  Future<void> fetchRevenueTracking() async {
+    try {
+      // Lấy dữ liệu từ collection 'orders'
+      final QuerySnapshot snapshot = await _firestore.collection('orders').get();
+
+      // Chuyển đổi dữ liệu thành danh sách Map và xử lý theo đúng cấu trúc
+      final fetchedOrders = snapshot.docs.map((doc) {
+        final orderData = doc.data() as Map<String, dynamic>;
+
+        // Kiểm tra và chuyển đổi 'purchaseDate' từ String thành DateTime
+        DateTime purchaseDate = DateTime.tryParse(orderData['purchaseDate'] ?? '') ?? DateTime.now();
+
+        return {
+          'orderId': doc.id, // Lưu orderId từ Firestore
+          'deliveryAddress': orderData['deliveryAddress'], // Địa chỉ giao hàng
+          'paymentMethod': orderData['paymentMethod'], // Phương thức thanh toán
+          'placeOfPurchase': orderData['placeOfPurchase'] ?? 'Unknown Store', // Nơi mua hàng
+          'purchaseDate': purchaseDate, // Ngày mua
+          'status': orderData['status'], // Trạng thái đơn hàng
+          'storeId': orderData['storeId'], // Store ID
+          'total': orderData['total'] ?? 0.0, // Tổng giá trị đơn hàng
+          'userId': orderData['userId'], // User ID
+          'listProducts': orderData['listProducts'], // Danh sách sản phẩm
+        };
+      }).toList();
+
+      // Lọc và tính doanh thu cho từng cửa hàng
+      Map<String, double> storeRevenue = {};
+
+      for (var order in fetchedOrders) {
+        String storeId = order['storeId'];
+        double total = double.parse(order['total'].toString());
+        String storeName = order['placeOfPurchase'];
+
+        // Kiểm tra nếu storeId chưa có trong map thì khởi tạo
+        if (!storeRevenue.containsKey(storeId)) {
+          storeRevenue[storeId] = 0.0;
+        }
+
+        // Cộng thêm doanh thu vào cửa hàng tương ứng
+        storeRevenue[storeId] = storeRevenue[storeId]! + total;
+
+        // Log thông tin chi tiết
+        print('Store ID: $storeId, Name: $storeName, Revenue: ${storeRevenue[storeId]}');
+      }
+
+      // Gán dữ liệu vào biến orderTracking
+      getRevenue.assignAll(fetchedOrders);
+      print('Fetch Revenue Tracking completed.');
+    } catch (e) {
+      print('Error fetching order tracking: $e');
+    }
+  }
+
+
+  // lay dư lieu orderTracking
+  Future<void> fetchOrderTracking() async {
+    try {
+      // Lấy dữ liệu từ collection 'orders'
+      final QuerySnapshot snapshot = await _firestore.collection('orders').get();
+
+      // Chuyển đổi dữ liệu thành danh sách Map và xử lý theo đúng cấu trúc
+      final fetchedOrders = snapshot.docs.map((doc) {
+        final orderData = doc.data() as Map<String, dynamic>;
+
+        return {
+          'orderId': doc.id, // Lưu orderId từ Firestore
+          'deliveryAddress': orderData['deliveryAddress'], // Địa chỉ giao hàng
+          'paymentMethod': orderData['paymentMethod'], // Phương thức thanh toán
+          'placeOfPurchase': orderData['placeOfPurchase'], // Nơi mua hàng
+          'purchaseDate': orderData['purchaseDate'], // Ngày mua
+          'status': orderData['status'], // Trạng thái đơn hàng
+          'storeId': orderData['storeId'], // Store ID
+          'total': orderData['total'], // Tổng giá trị đơn hàng
+          'userId': orderData['userId'], // User ID
+          'listProducts': orderData['listProducts'], // Danh sách sản phẩm
+        };
+      }).toList();
+
+      // In ra dữ liệu đã lấy được
+      print('Order Tracking fetched:');
+      fetchedOrders.forEach((order) {
+        print('Order ID: ${order['orderId']}, Data: $order');
+      });
+
+      // Gán dữ liệu vào biến orderTracking
+      orderTracking.assignAll(fetchedOrders);
+    } catch (e) {
+      print('Error fetching order tracking: $e');
+    }
+  }
+  // update status
+  Future<void> updateOrderStatus(String orderId, String newStatus) async {
+    try {
+      // Tham chiếu đến tài liệu có orderId trong Firestore
+      final DocumentReference orderDoc = _firestore.collection('orders').doc(orderId);
+
+      // Cập nhật trường 'status' với giá trị mới
+      await orderDoc.update({'status': newStatus});
+
+      print('Order ID $orderId status updated to $newStatus');
+    } catch (e) {
+      print('Error updating order status: $e');
+    }
+  }
+  //update UI sau Update
+  void refreshOrderTracking() async {
+    await fetchOrderTracking(); // Lấy lại danh sách từ Firestore
+    update(); // Cập nhật trạng thái cho GetX
+  }
+
+
+
 
   Future<void> addProduct(Map<String, dynamic> productData) async {
     try {

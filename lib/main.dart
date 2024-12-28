@@ -28,9 +28,9 @@ class MyApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
         useMaterial3: true,
       ),
-      // home: const LoginView(),
+      home: const LoginView(),
       // home: MainNavAdmin(initialIndex: 0,),
-      home: MainNavShop(initialIndex: 0),
+      // home: MainNavShop(initialIndex: 0),
     );
   }
 }

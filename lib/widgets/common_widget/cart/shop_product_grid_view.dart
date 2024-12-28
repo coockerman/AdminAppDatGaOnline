@@ -8,9 +8,9 @@ import '../food_detail/food_detail.dart';
 import '../text/truncated_text.dart';
 
 
-class ProductGridView extends StatelessWidget {
+class ShopProductGridView extends StatelessWidget {
   final Map<String, dynamic> product;
-  const ProductGridView({super.key, required this.product});
+  const ShopProductGridView({super.key, required this.product});
 
   @override
   Widget build(BuildContext context) {
@@ -34,9 +34,7 @@ class ProductGridView extends StatelessWidget {
           ),
           child: Column(
             children: [
-                Stack(
-                children: [
-                ClipRRect(
+              ClipRRect(
                 borderRadius: BorderRadius.circular(15),
                 child: Image.network(
                   product['ImageUrlFacebook'] ?? '',
@@ -57,37 +55,8 @@ class ProductGridView extends StatelessWidget {
                   },
                 ),
               ),
-              Positioned(
-                top: 10, // Khoảng cách từ trên
-                right: 10, // Khoảng cách từ phải
-                child: GestureDetector(
-                  onTap: () {
-                    // Hàm xử lý khi nhấn vào icon edit
-                    print('Edit icon tapped');
-                    showEditProductDialog(
-                      context,
-                      product['id'],
-                      product,
-                          (updatedData) {
-                        controllerData.updateProduct(product['id'], updatedData);
-                      },
-                    );
-                  },
-                  child: CircleAvatar(
-                    radius: 15,
-                    backgroundColor: Colors.white.withOpacity(0.8), // Màu nền mờ
-                    child: const Icon(
-                      Icons.edit,
-                      size: 18,
-                      color: Colors.black,
-                    ),
-                  ),
-                ),
-              ),
-              ],
-            ),
 
-        Padding(
+              Padding(
                 padding: const EdgeInsets.only(right: 4, left: 4, top: 10, bottom: 10),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,

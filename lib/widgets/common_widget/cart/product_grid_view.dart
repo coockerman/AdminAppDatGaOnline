@@ -162,6 +162,9 @@ class _ProductGridViewState extends State<ProductGridView> {
     final TextEditingController showController =
     TextEditingController(text: currentData['Show'].toString());
 
+    String dropdownValue = currentData['Show'] == 1 ? 'Hiển thị' : 'Ẩn';
+    String dropdownValueCategory = currentData['Category'] ?? 'Combo 1 Người'; // Giá trị mặc định cho danh mục
+
     showDialog(
       context: context,
       builder: (context) {
@@ -179,9 +182,39 @@ class _ProductGridViewState extends State<ProductGridView> {
                   decoration: InputDecoration(labelText: 'Price'),
                   keyboardType: TextInputType.number,
                 ),
-                TextField(
-                  controller: categoryController,
-                  decoration: InputDecoration(labelText: 'Category'),
+                const SizedBox(height: 10),
+                DropdownButtonFormField<String>(
+                  value: dropdownValueCategory,
+                  items: const [
+                    DropdownMenuItem(
+                      value: 'Combo 1 Người',
+                      child: Text('Combo 1 Người'),
+                    ),
+                    DropdownMenuItem(
+                      value: 'Combo Nhóm',
+                      child: Text('Combo Nhóm'),
+                    ),
+                    DropdownMenuItem(
+                      value: 'Gà Rán - Gà Quay',
+                      child: Text('Gà Rán - Gà Quay'),
+                    ),
+                    DropdownMenuItem(
+                      value: 'Burger - Cơm - Mì Ý',
+                      child: Text('Burger - Cơm - Mì Ý'),
+                    ),
+                    DropdownMenuItem(
+                      value: 'Thức ăn nhẹ',
+                      child: Text('Thức ăn nhẹ'),
+                    ),
+                    DropdownMenuItem(
+                      value: 'Thức uống & tráng miệng',
+                      child: Text('Thức uống & tráng miệng'),
+                    ),
+                  ],
+                  onChanged: (String? newValue) {
+                    dropdownValueCategory = newValue!;
+                  },
+                  decoration: InputDecoration(labelText: 'Danh mục sản phẩm'),
                 ),
                 TextField(
                   controller: descriptionController,
@@ -199,10 +232,23 @@ class _ProductGridViewState extends State<ProductGridView> {
                   controller: idController,
                   decoration: InputDecoration(labelText: 'Id'),
                 ),
-                TextField(
-                  controller: showController,
-                  decoration: InputDecoration(labelText: 'Show'),
-                  keyboardType: TextInputType.number,
+                const SizedBox(height: 10),
+                DropdownButtonFormField<String>(
+                  value: dropdownValue,
+                  items: const [
+                    DropdownMenuItem(
+                      value: 'Hiển thị',
+                      child: Text('Hiển thị'),
+                    ),
+                    DropdownMenuItem(
+                      value: 'Ẩn',
+                      child: Text('Ẩn'),
+                    ),
+                  ],
+                  onChanged: (String? newValue) {
+                    dropdownValue = newValue!;
+                  },
+                  decoration: InputDecoration(labelText: 'Trạng thái hiển thị'),
                 ),
               ],
             ),
@@ -219,13 +265,12 @@ class _ProductGridViewState extends State<ProductGridView> {
                 final updatedData = {
                   'Name': nameController.text,
                   'Price': int.tryParse(priceController.text) ?? 0,
-                  'Category': categoryController.text,
+                  'Category': dropdownValueCategory, // Lưu danh mục đã chọn
                   'Description': descriptionController.text,
                   'ImageUrl': imageUrlController.text,
                   'ImageUrlFacebook': imageUrlFacebookController.text,
                   'id': idController.text,
-                  'Show': int.tryParse(showController.text) ?? 0,
-
+                  'Show': dropdownValue == 'Hiển thị' ? 1 : 0, // Xử lý trạng thái
                 };
                 onSubmit(updatedData);
                 Navigator.pop(context);
